@@ -7,4 +7,5 @@ folium
 requests
 pandas
 numpy
-itertools
+regex
+jsonlib
