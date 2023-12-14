@@ -1,0 +1,12 @@
+geopy
+streamlit
+streamlit_folium 
+geopandas
+st_pages
+folium
+json
+requests
+pandas
+numpy
+re
+itertools
