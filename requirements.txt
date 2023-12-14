@@ -7,5 +7,4 @@ folium
 requests
 pandas
 numpy
-re
 itertools
