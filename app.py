@@ -116,11 +116,11 @@ def get_book_list_for_country(df, country):
     else:
         filtered_df = df[df['place_key'].fillna('').apply(contains, item=[country])]
 
-    filtered_df = filtered_df[['title', 'author_name', 'last_publish_year', 'subject_key', 'url', 'favorite']] #,'place_key'
+    filtered_df = filtered_df[['title', 'author_name', 'last_publish_year', 'subject_key', 'url','key', 'favorite']] #,'place_key'
     filtered_df['Country']=country.title()
     filtered_df = filtered_df.rename(columns={'title':'Title','author_name':'Author','last_publish_year':'Year'})
 
-    
+    #filtered_df['image']=
 
     return filtered_df
 
@@ -139,6 +139,7 @@ def make_selection(filtered_df):
                 help="Select your **favorite** books",
                 #default=False,
             ),
+            #'image': st.column_config.ImageColumn(label=None, *, width=None, help=None)
             "url": st.column_config.LinkColumn(),
         },
         column_order=('Title', 'Author', 'Year','url', 'favorite'),
@@ -182,10 +183,6 @@ if data is not None:
 
     with selector:
 
-
-        
-        
-        
         country = get_country(data)
         
         df = import_book_list()
@@ -193,13 +190,8 @@ if data is not None:
         if hasattr(st.session_state, 'df'):
             df['favorite'] = st.session_state.df
     
-        
-        
         filtered_df = get_book_list_for_country(df, country)
         
-
-
-
         selected_df = make_selection(filtered_df)
         
     if hasattr(st.session_state, 'df'):
