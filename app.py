@@ -104,11 +104,55 @@ def get_book_list_for_country(df, country):
     
 
     
-    all_names={
-        'iran': ['iran','persia','persepolis', 'pasargad', 'elam', 'media'],
-        'united kingdom': ['ireland','scotland','wales', 'london'],
-        'pakistan': ['pakistan', 'indus', 'mohendsch', 'mohenj']
-    }
+    all_names = {
+            'iran': ['iran', 'persia', 'persepolis', 'pasargad', 'elam', 'media'],
+            'iraq': ['iraq', 'mesopotamia', 'sumer', 'akkad', 'babylon', 'assyr', 'parthi', 'sassanian', 'ottoman'],
+            'united kingdom': ['england','ireland', 'scotland', 'wales', 'london'],
+            'pakistan': ['pakistan', 'indus', 'mohendsch', 'mohenj'],
+            'greece': ['greece', 'achaea', 'aeolis', 'arcadia', 'boeotia', 'chalcidice', 'crete', 'cyprus', 'cyzicus', 'delphi', 'dodona', 'euboea', 'epirus', 'etolia', 'heracleia', 'ionia', 'laconia', 'lesbos', 'lydia', 'macedonia', 'megaris', 'messinia', 'mycenae', 'olbia', 'peloponnese', 'phocis', 'phoenicia', 'thebes', 'thessaly', 'crete'],
+            'albania': ['albania', 'dardania', 'ancient epirus'],
+            'algeria': ['algeria', 'numidia', 'roman province of mauretania'],
+            'angola': ['angola', 'kingdom of kongo'],
+            'armenia': ['armenia', 'urartu', 'arsacid empire'],
+            'austria': ['austria', 'ostmark', 'roman province of noricum'],
+            'belarus': ['belarus', 'white rus', 'slavic settlements'],
+            'belgium': ['belgium', 'belgium', 'roman province of gallia belgica', 'habsburg netherlands'],
+            'bosnia and herzegovina': ['bosnia and herzegovina', 'bosna', 'hum'],
+            'bulgaria': ['bulgaria', 'thrace', 'odysian kingdom'],
+            'croatia': ['croatia', 'panonia', 'illyria'],
+            'cyprus': ['cyprus', 'cypriot civilization', 'minoan settlements'],
+            'czechia': ['czech republic', 'czech lands', 'great moravian empire', 'bohemian kingdom'],
+            'denmark': ['denmark', 'denmark', 'vikings', 'viking age'],
+            'finland': ['finland', 'finland', 'samoyede'],
+            'france': ['france', 'gaul', 'celtic tribes', 'roman province of gaul'],
+            'georgia': ['georgia', 'iberia', 'colchis'],
+            'germany': ['germany', 'teutonic tribes', 'holy roman empire'], 
+            'hungary': ['hungary', 'hungary', 'avar khaganate'],
+            'iceland': ['iceland', 'norse settlers', 'viking age'],
+            'ireland': ['ireland', 'ireland', 'celtic tribes'],
+            'italy': ['italy', 'latium', 'etruria', 'ausonia', 'enotria', 'roma', 'rome'],
+            'kazakhstan': ['kazakhstan', 'saka tribes', 'khazar khanate'],
+            'kosovo': ['kosovo', 'kosovo', 'serbian empire'],
+            'latvia': ['latvia', 'latvia', 'baltic tribes'],
+            'lithuania': ['lithuania', 'lithuania', 'baltic tribes'],
+            'luxembourg': ['luxembourg', 'grand duchy of luxembourg'],
+            'macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
+            'north macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
+            'moldova': ['moldova', 'dacia', 'roman province of dacia'],
+            'morocco': ['morocco', 'berber kingdoms'],
+            'netherlands': ['netherlands', 'low countries', 'frankish empire', 'dutch republic'],
+            'poland': ['poland', 'vistula river trade routes', 'polish-lithuanian commonwealth'],
+            'portugal': ['portugal', 'lusitanian tribes', 'roman province of lusitania'],
+            'romania': ['romania', 'romania', 'dacia', 'roman province of dacia'],
+            'russia': ['russia', 'scythia', 'sarmatians', 'khazar khanate'],
+            'serbia': ['serbia', 'serbia', 'serbian empire'],
+            'slovakia': ['slovakia', 'slovak lands', 'principality of nitra', 'great moravian empire'],
+            'slovenia': ['slovenia', 'slovenian lands', 'slovenia'],
+            'spain': ['spain', 'hispania', 'iberian peninsula', 'tartessian civilization', 'numidians', 'roman province of hispanial'],
+            'switzerland': ['switzerland', 'helvetian confederacy', 'roman province of helvetia'],
+            'turkey': ['turkey', 'anatolia', 'hittite empire', 'hattu', 'phrygian kingdom', 'phrygia', 'ancient greek colonies'],
+            'ukraine': ['ukraine', 'kievan rus']
+            }
 
 
     if country in all_names.keys():
