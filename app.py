@@ -18,6 +18,25 @@ import re
 import itertools
 
 
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+
+
+
+# download list of stopwords from nltk lib.
+stop_words = set(stopwords.words('english'))
+
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import pairwise_distances
+from scipy.sparse import hstack
+
+
+
+
+
 
 def contains(sublist, item):
     if item is None:
@@ -55,7 +74,7 @@ def make_clickable(link):
     url =  link.split('===')[0]
     return f'<a target="_blank" href="{url}">{text}</a>'
 
-map_screen, selector = st.columns([2,3], gap="small")
+
 
 def get_map_coords():
 
@@ -98,62 +117,73 @@ def import_book_list():
     return df
 
 
+@st.cache_data
+def compile_ancient_country_names():
+    all_names_lists = {
+        'iran': ['iran', 'persia', 'persepolis', 'pasargad', 'elam', 'media'],
+        'iraq': ['iraq', 'mesopotamia', 'sumer', 'akkad', 'babylon', 'assyr', 'parthi', 'sassanian'],
+        'united kingdom': ['england','ireland', 'scotland', 'wales', 'london'],
+        'pakistan': ['pakistan', 'indus', 'mohendsch', 'mohenj'],
+        'greece': ['greece', 'achaea', 'aeolis', 'arcadia', 'boeotia', 'chalcidice', 'crete', 'cyprus', 'cyzicus', 'delphi', 'dodona', 'euboea', 'epirus', 'etolia', 'heracleia', 'ionia', 'laconia', 'lesbos', 'lydia', 'macedonia', 'megaris', 'messinia', 'mycenae', 'olbia', 'peloponnese', 'phocis', 'phoenicia', 'thebes', 'thessaly', 'crete'],
+        'albania': ['albania', 'dardania', 'ancient epirus'],
+        'algeria': ['algeria', 'numidia', 'roman province of mauretania'],
+        'angola': ['angola', 'kingdom of kongo'],
+        'armenia': ['armenia', 'urartu', 'arsacid empire'],
+        'austria': ['austria', 'ostmark', 'roman province of noricum'],
+        'belarus': ['belarus', 'white rus', 'slavic settlements'],
+        'belgium': ['belgium', 'belgium', 'roman province of gallia belgica', 'habsburg netherlands'],
+        'bosnia and herzegovina': ['bosnia and herzegovina', 'bosna', 'hum'],
+        'bulgaria': ['bulgaria', 'thrace', 'odysian kingdom'],
+        'croatia': ['croatia', 'panonia', 'illyria'],
+        'cyprus': ['cyprus', 'cypriot civilization', 'minoan settlements'],
+        'czechia': ['czech republic', 'czech lands', 'great moravian empire', 'bohemian kingdom'],
+        'denmark': ['denmark', 'denmark', 'vikings', 'viking age'],
+        'finland': ['finland', 'finland', 'samoyede'],
+        'france': ['france', 'gaul', 'celtic tribes', 'roman province of gaul'],
+        'georgia': ['georgia', 'iberia', 'colchis'],
+        'germany': ['germany', 'teutonic tribes', 'holy roman empire'], 
+        'hungary': ['hungary', 'hungary', 'avar khaganate'],
+        'iceland': ['iceland', 'norse settlers', 'viking age'],
+        'ireland': ['ireland', 'ireland', 'celtic tribes'],
+        'italy': ['italy', 'latium', 'etruria', 'ausonia', 'enotria', 'roma', 'rome'],
+        'kazakhstan': ['kazakhstan', 'saka tribes', 'khazar khanate'],
+        'kosovo': ['kosovo', 'kosovo', 'serbian empire'],
+        'latvia': ['latvia', 'latvia', 'baltic tribes'],
+        'lithuania': ['lithuania', 'lithuania', 'baltic tribes'],
+        'luxembourg': ['luxembourg', 'grand duchy of luxembourg'],
+        'macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
+        'north macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
+        'moldova': ['moldova', 'dacia', 'roman province of dacia'],
+        'morocco': ['morocco', 'berber kingdoms'],
+        'netherlands': ['netherlands', 'low countries', 'frankish empire', 'dutch republic'],
+        'poland': ['poland', 'vistula river trade routes', 'polish-lithuanian commonwealth'],
+        'portugal': ['portugal', 'lusitanian tribes', 'roman province of lusitania'],
+        'romania': ['romania', 'romania', 'dacia', 'roman province of dacia'],
+        'russia': ['russia', 'scythia', 'sarmatians', 'khazar khanate'],
+        'serbia': ['serbia', 'serbia', 'serbian empire'],
+        'slovakia': ['slovakia', 'slovak lands', 'principality of nitra', 'great moravian empire'],
+        'slovenia': ['slovenia', 'slovenian lands', 'slovenia'],
+        'spain': ['spain', 'hispania', 'iberian peninsula', 'tartessian civilization', 'numidians', 'roman province of hispanial'],
+        'switzerland': ['switzerland', 'helvetian confederacy', 'roman province of helvetia'],
+        'turkey': ['turkey', 'anatolia', 'hittite empire', 'hattu', 'phrygian kingdom', 'phrygia', 'ancient greek colonies'],
+        'ukraine': ['ukraine', 'kievan rus']
+        }
+    
+    all_names_string={}
+    for k,i in all_names_lists.items():
+        all_names_string.update({k:' '.join(all_names_lists[k])})
+
+
+
+
+
+    return all_names_lists, all_names_string
 
 @st.cache_data
 def get_book_list_for_country(df, country):
-    
 
-    
-    all_names = {
-            'iran': ['iran', 'persia', 'persepolis', 'pasargad', 'elam', 'media'],
-            'iraq': ['iraq', 'mesopotamia', 'sumer', 'akkad', 'babylon', 'assyr', 'parthi', 'sassanian', 'ottoman'],
-            'united kingdom': ['england','ireland', 'scotland', 'wales', 'london'],
-            'pakistan': ['pakistan', 'indus', 'mohendsch', 'mohenj'],
-            'greece': ['greece', 'achaea', 'aeolis', 'arcadia', 'boeotia', 'chalcidice', 'crete', 'cyprus', 'cyzicus', 'delphi', 'dodona', 'euboea', 'epirus', 'etolia', 'heracleia', 'ionia', 'laconia', 'lesbos', 'lydia', 'macedonia', 'megaris', 'messinia', 'mycenae', 'olbia', 'peloponnese', 'phocis', 'phoenicia', 'thebes', 'thessaly', 'crete'],
-            'albania': ['albania', 'dardania', 'ancient epirus'],
-            'algeria': ['algeria', 'numidia', 'roman province of mauretania'],
-            'angola': ['angola', 'kingdom of kongo'],
-            'armenia': ['armenia', 'urartu', 'arsacid empire'],
-            'austria': ['austria', 'ostmark', 'roman province of noricum'],
-            'belarus': ['belarus', 'white rus', 'slavic settlements'],
-            'belgium': ['belgium', 'belgium', 'roman province of gallia belgica', 'habsburg netherlands'],
-            'bosnia and herzegovina': ['bosnia and herzegovina', 'bosna', 'hum'],
-            'bulgaria': ['bulgaria', 'thrace', 'odysian kingdom'],
-            'croatia': ['croatia', 'panonia', 'illyria'],
-            'cyprus': ['cyprus', 'cypriot civilization', 'minoan settlements'],
-            'czechia': ['czech republic', 'czech lands', 'great moravian empire', 'bohemian kingdom'],
-            'denmark': ['denmark', 'denmark', 'vikings', 'viking age'],
-            'finland': ['finland', 'finland', 'samoyede'],
-            'france': ['france', 'gaul', 'celtic tribes', 'roman province of gaul'],
-            'georgia': ['georgia', 'iberia', 'colchis'],
-            'germany': ['germany', 'teutonic tribes', 'holy roman empire'], 
-            'hungary': ['hungary', 'hungary', 'avar khaganate'],
-            'iceland': ['iceland', 'norse settlers', 'viking age'],
-            'ireland': ['ireland', 'ireland', 'celtic tribes'],
-            'italy': ['italy', 'latium', 'etruria', 'ausonia', 'enotria', 'roma', 'rome'],
-            'kazakhstan': ['kazakhstan', 'saka tribes', 'khazar khanate'],
-            'kosovo': ['kosovo', 'kosovo', 'serbian empire'],
-            'latvia': ['latvia', 'latvia', 'baltic tribes'],
-            'lithuania': ['lithuania', 'lithuania', 'baltic tribes'],
-            'luxembourg': ['luxembourg', 'grand duchy of luxembourg'],
-            'macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
-            'north macedonia': ['macedonia', 'aegae', 'eordaia', 'upper macedonia', 'chalcidice'],
-            'moldova': ['moldova', 'dacia', 'roman province of dacia'],
-            'morocco': ['morocco', 'berber kingdoms'],
-            'netherlands': ['netherlands', 'low countries', 'frankish empire', 'dutch republic'],
-            'poland': ['poland', 'vistula river trade routes', 'polish-lithuanian commonwealth'],
-            'portugal': ['portugal', 'lusitanian tribes', 'roman province of lusitania'],
-            'romania': ['romania', 'romania', 'dacia', 'roman province of dacia'],
-            'russia': ['russia', 'scythia', 'sarmatians', 'khazar khanate'],
-            'serbia': ['serbia', 'serbia', 'serbian empire'],
-            'slovakia': ['slovakia', 'slovak lands', 'principality of nitra', 'great moravian empire'],
-            'slovenia': ['slovenia', 'slovenian lands', 'slovenia'],
-            'spain': ['spain', 'hispania', 'iberian peninsula', 'tartessian civilization', 'numidians', 'roman province of hispanial'],
-            'switzerland': ['switzerland', 'helvetian confederacy', 'roman province of helvetia'],
-            'turkey': ['turkey', 'anatolia', 'hittite empire', 'hattu', 'phrygian kingdom', 'phrygia', 'ancient greek colonies'],
-            'ukraine': ['ukraine', 'kievan rus']
-            }
 
+    all_names, _ = compile_ancient_country_names()
 
     if country in all_names.keys():
         filtered_df = df[df['place_key'].fillna('').apply(contains, item=all_names[country])]
@@ -206,17 +236,47 @@ def on_checkbox_klick():
     
 
 
+### recommender
 
 
+def convert_to_string(row, column):
+    if isinstance(row[column], list):
+        # If the value is a list, join the strings using a comma
+        subject_key_str = ' '.join(row[column])
+    else:
+        # If the value is a string, just return the string itself
+        subject_key_str = row[column]
+    return subject_key_str
 
 
+def nlp_preprocessing(total_text, index, column, dataframe):
+    if type(total_text) is str:
+        string = ""
+        for words in total_text.split():
+            # remove the special chars like '"#$@!%^&*()_+-~?>< etc.
+            word = ("".join(e for e in words if e.isalnum()))
+            # Convert all letters to lower-case
+            word = word.lower()
+            # stop-word removal
+            if not word in stop_words:
+                string += word + " "
+        dataframe[column][index] = string
+    else:
+        dataframe[column][index] = ""
+        
+        
 
 
+        
 
 
+def collapse_column(column):
+    return 1 if any(column) else 0
 
 
+st.markdown("## Please select a country and click (always twice) on your favorite books about the history of this country.")
 
+map_screen, selector = st.columns([2,3], gap="small")
 
 
 with map_screen:
@@ -243,9 +303,124 @@ if data is not None:
         
         df_fav=df[df['favorite']==True]
         st.write(df_fav)
+        
+        st.session_state.final_df_fav=df_fav
       
         
         
 
     
-   
+if st.button('Get recommendations', type="primary"):
+    
+
+    
+ 
+    
+    if hasattr(st.session_state, 'final_df_fav'):
+        _, all_names = compile_ancient_country_names()
+        
+        df_fav=st.session_state.final_df_fav
+        
+    
+    
+        # Apply convert_to_string function to each row of the 'subject_key' column
+        df_fav['subject_key'] = df_fav.apply(convert_to_string, args=('subject_key',), axis=1)
+        df_fav['place_key'] = df_fav.apply(convert_to_string, args=('place_key',), axis=1)
+        df_fav['person_key'] = df_fav.apply(convert_to_string, args=('person_key',), axis=1)
+
+        for index, row in df_fav.iterrows():
+            nlp_preprocessing(row['subject_key'], index, 'subject_key',df_fav)
+        for index, row in df_fav.iterrows():
+            nlp_preprocessing(row['place_key'], index, 'place_key',df_fav)
+        for index, row in df_fav.iterrows():
+            nlp_preprocessing(row['person_key'], index, 'person_key',df_fav)
+
+        df_fav['place_key']=df_fav['place_key'].replace(all_names, regex=True)
+
+
+        
+        
+        
+############################    
+        df_all = df.copy()
+        
+        # Apply convert_to_string function to each row of the 'subject_key' column
+        df_all['subject_key'] = df_all.apply(convert_to_string, args=('subject_key',), axis=1)
+        df_all['place_key'] = df_all.apply(convert_to_string, args=('place_key',), axis=1)
+        df_all['person_key'] = df_all.apply(convert_to_string, args=('person_key',), axis=1)
+
+        for index, row in df_all.iterrows():
+            nlp_preprocessing(row['subject_key'], index, 'subject_key',df_all)
+        for index, row in df_all.iterrows():
+            nlp_preprocessing(row['place_key'], index, 'place_key',df_all)
+        for index, row in df_all.iterrows():
+            nlp_preprocessing(row['person_key'], index, 'person_key',df_all)
+
+        
+        df_all['place_key']=df_all['place_key'].replace(all_names, regex=True)
+    
+        df_all=df_all[~df_all.index.isin(df_fav.index)]
+
+        
+##################################
+
+        subject_key_vectorizer = CountVectorizer()
+        subject_key_features   = subject_key_vectorizer.fit_transform(df_all['subject_key'])
+        
+
+        place_key_vectorizer = CountVectorizer()
+        place_key_features   = place_key_vectorizer.fit_transform(df_all['place_key'])
+        
+
+        person_key_vectorizer = CountVectorizer()
+        person_key_features   = person_key_vectorizer.fit_transform(df_all['person_key'])
+        
+
+        all_features_df = hstack((subject_key_features, place_key_features,person_key_features)).tocsr()
+        
+
+        
+################################        
+        
+
+        subject_key_features   = subject_key_vectorizer.transform(df_fav['subject_key'])
+        
+
+        place_key_features   = place_key_vectorizer.transform(df_fav['place_key'])
+        
+
+        person_key_features   = person_key_vectorizer.transform(df_fav['person_key'])
+        
+
+        all_features_df_fav = hstack((subject_key_features, place_key_features,person_key_features)).tocsr()
+               
+
+        
+################################   
+
+
+        
+        
+        # Collapse each column into a matrix of a single row
+        collapsed_matrix = np.array([[collapse_column(i) for i in all_features_df_fav.toarray().T]])
+
+        
+        
+##############################
+
+
+        selection = collapsed_matrix
+        num_results = 10
+        pairwise_dist = pairwise_distances(all_features_df,selection)
+
+        # np.argsort will return indices of the smallest distances
+        indices = np.argsort(pairwise_dist.flatten())[0:num_results]
+
+        df_indices = list(df_all.index[indices])
+
+
+
+        df_recommended = df_all.loc[df_indices]
+
+        st.write(df_recommended)
+    
