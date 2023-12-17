@@ -8,3 +8,5 @@ requests
 pandas
 numpy
 regex
+scikit-learn
+nltk
