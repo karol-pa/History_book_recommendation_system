@@ -376,7 +376,12 @@ if __name__ == "__main__":
         st.markdown("### Selected books:")
         df_fav=df[df['favorite']==True]
         df_fav=df_fav.rename(columns={'title':'Title', 'author_name':'Author', 'last_publish_year':'Year', 'place':'Country', 'person':'Person(s)', 'isbn':'ISBN'})
-        st.dataframe(df_fav[['Title', 'Author', 'Year', 'Country','Person(s)', 'url', 'ISBN']], hide_index=True, use_container_width=True)
+        st.dataframe(
+            df_fav[['Title', 'Author', 'Year', 'Country','Person(s)', 'url', 'ISBN']], 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={"url": st.column_config.LinkColumn(),}
+        )
 
         st.session_state.final_df_fav=df_fav
 
@@ -423,7 +428,8 @@ if __name__ == "__main__":
                 column_config={
                     "image_link": st.column_config.ImageColumn(
                         "Preview Cover", help="Click on book cover to enlarge"
-                    )
+                    ),
+                    "url": st.column_config.LinkColumn(),
                 },
                 hide_index=True,
                 use_container_width=True
