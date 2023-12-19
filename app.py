@@ -397,16 +397,15 @@ if __name__ == "__main__":
             df['favorite'].iloc[selected_index_false]=False
 
             if hasattr(st.session_state, 'df'):
-                # if df['favorite'].any()!=st.session_state.df.any():
                 if df['favorite'].equals(st.session_state.df):
                     st.session_state.df=df['favorite']
-                    #st.rerun()
+
                 else: 
                     st.session_state.df=df['favorite']
                     st.rerun()
             else:
                 st.session_state.df=df['favorite']
-                #st.rerun()
+
 
             
             
