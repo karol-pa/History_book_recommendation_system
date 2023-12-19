@@ -211,6 +211,7 @@ class selector():
         selected_df = st.data_editor(
             filtered_df.drop_duplicates(subset=['Title']),
             column_config={
+                "Title": st.column_config.Column(width='medium'),
                 "favorite": st.column_config.CheckboxColumn(
                     "Your favorite?",
                     help="Select your **favorite** books",
@@ -392,21 +393,27 @@ if __name__ == "__main__":
 
 
             df_fav=st.session_state.final_df_fav
-            df_all=df[~df.index.isin(df_fav.index)]
-
-
-            df_fav=wp.preprocess_keywords(df_fav)
-            df_all=wp.preprocess_keywords(df_all)
-
-
-            all_features_df, all_features_df_fav = rec.fit_transform_word_vectors(df_all, df_fav)
-
-
-            df_recommended = rec.wvec_recommender(all_features_df, all_features_df_fav,num_results=10)
-            df_recommended = df_recommended[['title', 'author_name', 'last_publish_year', 'place','person', 'url', 'isbn']]
-            df_recommended = df_recommended.rename(columns={'title':'Title', 'author_name':'Author', 'last_publish_year':'Year', 'place':'Country', 'person':'Person(s)', 'isbn':'ISBN'})
             
+            if df_fav.empty:
+                st.error('Please select your favorite books.')
+                
+            else:
             
-            st.markdown("### Recommendations:")
-            st.write(df_recommended)
+                df_all=df[~df.index.isin(df_fav.index)]
+
+
+                df_fav=wp.preprocess_keywords(df_fav)
+                df_all=wp.preprocess_keywords(df_all)
+
+
+                all_features_df, all_features_df_fav = rec.fit_transform_word_vectors(df_all, df_fav)
+
+
+                df_recommended = rec.wvec_recommender(all_features_df, all_features_df_fav,num_results=10)
+                df_recommended = df_recommended[['title', 'author_name', 'last_publish_year', 'place','person', 'url', 'isbn']]
+                df_recommended = df_recommended.rename(columns={'title':'Title', 'author_name':'Author', 'last_publish_year':'Year', 'place':'Country', 'person':'Person(s)', 'isbn':'ISBN'})
+
+
+                st.markdown("### Recommendations:")
+                st.write(df_recommended)
 
