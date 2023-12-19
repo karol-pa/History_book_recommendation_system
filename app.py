@@ -25,12 +25,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import pairwise_distances
 from scipy.sparse import hstack
 
-
-
-nltk.download('stopwords')
-# download list of stopwords from nltk lib.
-stop_words = set(stopwords.words('english'))
-
 st.set_page_config(layout='wide',page_title = "Map")
 st.markdown("""
     <style>
@@ -43,6 +37,19 @@ st.markdown("""
         #stDecoration {display:none;}
     </style>
 """, unsafe_allow_html=True)
+
+
+@st.cache_data
+def download_stopwords():
+    nltk.download('stopwords')
+    # download list of stopwords from nltk lib.
+    stop_words = set(stopwords.words('english'))
+    return stop_words
+
+stop_words = download_stopwords()
+
+
+
 
 
 
@@ -196,7 +203,7 @@ class selector():
         filtered_df['Country']=country.title()
         filtered_df = filtered_df.rename(columns={'title':'Title','author_name':'Author','last_publish_year':'Year'})
 
-        #filtered_df['image']=
+
 
         return filtered_df
 
@@ -221,7 +228,7 @@ class selector():
             },
             column_order=('Title', 'Author', 'Year','url', 'favorite'),
             hide_index=True,
-            on_change=sel.on_checkbox_klick
+            #on_change=sel.on_checkbox_klick
 
         )
 
@@ -235,7 +242,15 @@ class selector():
         df['favorite'].iloc[selected_index_true]=True
         df['favorite'].iloc[selected_index_false]=False
 
-        st.session_state.df=df['favorite']
+        if hasattr(st.session_state, 'df'):
+            if df['favorite']!=st.session_state.df.all():
+                st.session_state.df=df['favorite']
+                
+            else: 
+                st.session_state.df=df['favorite']
+                #st.rerun()
+        else:
+            st.session_state.df=df['favorite']
 
 
 
@@ -350,7 +365,7 @@ if __name__ == "__main__":
     rec = recommender()    
 
     df = import_book_list()
-    st.markdown("## Please select a country and click (always twice) on your favorite books about the history of this country.")
+    st.markdown("## Please select a country and select your favorite books about the history of this country.")
 
     map_screen_column, selection_column = st.columns([2,3], gap="small")
 
@@ -371,6 +386,33 @@ if __name__ == "__main__":
             filtered_df = sel.get_book_list_for_country(df, country)
 
             selected_df = sel.make_selection(filtered_df)
+            
+            
+            
+            selected_index_true = selected_df.index[selected_df['favorite'] == True]
+            selected_index_false = selected_df.index[selected_df['favorite'] == False]
+
+
+            df['favorite'].iloc[selected_index_true]=True
+            df['favorite'].iloc[selected_index_false]=False
+
+            if hasattr(st.session_state, 'df'):
+                # if df['favorite'].any()!=st.session_state.df.any():
+                if df['favorite'].equals(st.session_state.df):
+                    st.session_state.df=df['favorite']
+                    #st.rerun()
+                else: 
+                    st.session_state.df=df['favorite']
+                    st.rerun()
+            else:
+                st.session_state.df=df['favorite']
+                #st.rerun()
+
+            
+            
+            
+            
+            
 
         #if hasattr(st.session_state, 'df'):
         st.markdown("### Selected books:")
