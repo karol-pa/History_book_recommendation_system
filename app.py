@@ -7,9 +7,8 @@ import geopy
 from geopy.geocoders import Nominatim
 
 import json
-from urllib.request import urlopen
-import requests
 
+                
 import pandas as pd
 import numpy as np
 
@@ -377,7 +376,7 @@ if __name__ == "__main__":
         st.markdown("### Selected books:")
         df_fav=df[df['favorite']==True]
         df_fav=df_fav.rename(columns={'title':'Title', 'author_name':'Author', 'last_publish_year':'Year', 'place':'Country', 'person':'Person(s)', 'isbn':'ISBN'})
-        st.write(df_fav[['Title', 'Author', 'Year', 'Country','Person(s)', 'url', 'ISBN']])
+        st.dataframe(df_fav[['Title', 'Author', 'Year', 'Country','Person(s)', 'url', 'ISBN']], hide_index=True, use_container_width=True)
 
         st.session_state.final_df_fav=df_fav
 
@@ -413,7 +412,19 @@ if __name__ == "__main__":
                 df_recommended = df_recommended[['title', 'author_name', 'last_publish_year', 'place','person', 'url', 'isbn']]
                 df_recommended = df_recommended.rename(columns={'title':'Title', 'author_name':'Author', 'last_publish_year':'Year', 'place':'Country', 'person':'Person(s)', 'isbn':'ISBN'})
 
+                
 
-                st.markdown("### Recommendations:")
-                st.write(df_recommended)
 
+                df_recommended['image_link']='https://covers.openlibrary.org/b/isbn/'+df_recommended['ISBN']+'-M.jpg'
+
+
+                st.dataframe(
+                df_recommended,
+                column_config={
+                    "image_link": st.column_config.ImageColumn(
+                        "Preview Cover", help="Click on book cover to enlarge"
+                    )
+                },
+                hide_index=True,
+                use_container_width=True
+                )
