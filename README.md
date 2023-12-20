@@ -26,4 +26,4 @@ How to use:
 1. Click on a country on the map.
 2. Select your favorite books associated with the selected country.
 3. Repeat with other countries.
-4. Click on the "Get Recommendations" button.
+4. Click on the "Get recommendations" button.
