@@ -111,7 +111,7 @@ class geo_functions():
 
     def get_country(self,data):
 
-        geocoder = Nominatim(user_agent="http")
+        geocoder = Nominatim(user_agent="History_book_recommendation_system") # "http"
         location = geocoder.reverse(f"{round(data[0],4)},{round(data[1],4)}", language='en')
         country = location.raw.get('address').get('country')
 
